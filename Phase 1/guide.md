@@ -4,7 +4,8 @@
 2. Ask Claude to create Terraform code for an S3 bucket. Use a prompt like:
 "Please provide Terraform code to create an S3 bucket in AWS with a unique name."
 3. Claude should generate code similar to this:
-'''
+
+```   
 provider "aws" {
   region = "us-west-2"  # Replace with your desired region
 }
@@ -26,7 +27,8 @@ resource "aws_s3_bucket_acl" "my_bucket_acl" {
   bucket = aws_s3_bucket.my_bucket.id
   acl    = "private"
 }
-'''
+```
+
 
 ## Step 2: Create IAM Role for EC2
 
@@ -38,3 +40,4 @@ resource "aws_s3_bucket_acl" "my_bucket_acl" {
 Note: In a production environment, use a more restricted policy.
 6. Name the role "EC2Admin" and provide a description.
 7. Review and create the role.
+
