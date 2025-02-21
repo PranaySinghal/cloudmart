@@ -106,3 +106,100 @@ CMD ["serve", "-s", ".", "-l", "5001"]
 ```
 
 # Part 2 - Kubernetes
+
+Attention: AWS Kubernetes service is not free, so when executing the hands-on below, you will be charged a few cents on your AWS account according to EKS pricing on AWS.
+
+Remember to delete the cluster to avoid unwanted charges. Use the removal section at the end of the doc.
+
+## Cluster Setup on AWS Elastic Kubernetes Services (EKS)
+
+1. Create a user named `eksuser` with Admin privileges and authenticate with it. Once you run the command, follow the commands: 
+
+IAM User<sec credentials<create access key<Use case CLI< Confirm
+    
+    ```yaml
+    aws configure
+    ```
+    
+2. Install the CLI tool `eksctl`
+    
+    ```bash
+    curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+    sudo cp /tmp/eksctl /usr/bin
+    eksctl version
+    ```
+    
+3. Install the CLI tool `kubectl`
+    
+    ```bash
+    curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+    chmod +x ./kubectl
+    mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+    echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+    kubectl version --short --client
+    ```
+    
+4. Create an EKS Cluster
+    
+    ```bash
+    eksctl create cluster \
+      --name cloudmart \
+      --region us-east-1 \
+      --nodegroup-name standard-workers \
+      --node-type t3.medium \
+      --nodes 1 \
+      --with-oidc \
+      --managed
+    ```
+    
+5. Connect to the EKS cluster using the `kubectl` configuration
+    
+    ```bash
+    aws eks update-kubeconfig --name cloudmart
+    ```
+    
+6. Verify Cluster Connectivity
+    
+    ```bash
+    kubectl get svc
+    kubectl get nodes
+    ```
+    
+7. Create a Role & Service Account to provide pods access to services used by the application (DynamoDB, Bedrock, etc).
+    
+    ```bash
+    eksctl create iamserviceaccount \
+      --cluster=cloudmart \
+      --name=cloudmart-pod-execution-role \
+      --role-name CloudMartPodExecutionRole \
+      --attach-policy-arn=arn:aws:iam::aws:policy/AdministratorAccess\
+      --region us-east-1 \
+      --approve
+    ```
+    
+
+<aside>
+💡
+
+NOTE: In the example above, Admin privileges were used to facilitate educational purposes. Always remember to follow the principle of least privilege in production environments
+
+</aside>
+
+## Backend Deployment on Kubernetes
+
+### **Create an ECR Repository for the Backend and upload the Docker image to it**
+
+```bash
+Repository name: cloudmart-backend
+```
+
+### Switch to backend folder
+
+```docker
+cd ../..
+cd challenge-day2/backend
+```
+
+### Follow the ECR steps to build your Docker image
+
+### **Create a Kubernetes deployment file (YAML) for the Backend**
