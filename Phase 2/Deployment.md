@@ -202,6 +202,9 @@ cd challenge-day2/backend
 
 ### Follow the ECR steps to build your Docker image
 
+Note: For the step push command ```docker build -t cloudmart-frontend .```, network error may occur. Instead use:
+```docker build -t cloudmart-frontend . --network=host ```
+
 ### **Create a Kubernetes deployment file (YAML) for the Backend**
 
 Get the image url from the ECR image repository url. 
