@@ -263,3 +263,7 @@ spec:
       targetPort: 5000
 ```
 
+
+
+![image](https://github.com/user-attachments/assets/8bdb3959-042b-4836-9210-99ebd631a3b7)
+
