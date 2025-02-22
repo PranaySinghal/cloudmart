@@ -263,7 +263,110 @@ spec:
       targetPort: 5000
 ```
 
+Deploy the Backend on Kubernetes
 
+```kubectl apply -f cloudmart-backend.yaml```
+​
+Monitor the status of objects being created and obtain the public IP generated for the API
+
+```
+kubectl get pods
+kubectl get deployment
+kubectl get service
+```
+​
+### Frontend Deployment on Kubernetes
+### Preparation
+Change the Frontend's .env file to point to the API URL created within Kubernetes obtained by the kubectl get service command
+
+```
+cd ../challenge-day2/frontend
+nano .env
+```
+​
+Content of .env:
+```
+VITE_API_BASE_URL=http://<your_url_kubernetes_api>:5000/api
+```
+
+### Create an ECR Repository for the Frontend and upload the Docker image to it
+
+```bash
+Repository name: cloudmart-frontend
+```
+
+### Follow the ECR steps to build your Docker image
+
+### **Create a Kubernetes deployment file (YAML) for the Frontend**
+
+```yaml
+nano cloudmart-frontend.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudmart-frontend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudmart-frontend-app
+  template:
+    metadata:
+      labels:
+        app: cloudmart-frontend-app
+    spec:
+      serviceAccountName: cloudmart-pod-execution-role
+      containers:
+      - name: cloudmart-frontend-app
+        **image: public.ecr.aws/l4c0j8h9/cloudmart-frontend:latest**
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudmart-frontend-app-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: cloudmart-frontend-app
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
+```
+
+### **Deploy the Frontend on Kubernetes**
+
+```yaml
+kubectl apply -f cloudmart-frontend.yaml
+```
+
+Monitor the status of objects being created and obtain the public IP generated for the API
+
+```yaml
+kubectl get pods
+kubectl get deployment
+kubectl get service
+```
+Note: Copy the backend-app-service image external-ip (DNS name) and paste it in the browser along with port to access the site. 
+Ex. http://abce3d0da5e7140560fe4ffd-382955659.us-east-1.elb.amazonaws.com:50xx/
+Add admin at the end for admin edit privileges 
+
+### Removal
+At the end of the hands-on, delete all resources:
+If you delete the cluster at the end of the exercise, you'll have to recreate it for the next days. So decide what makes more sense for you: delete the cluster and recreate it every day or keep it and pay for the time it's running. However, don't forget to delete it permanently at the end of the Challenge.
+
+```
+kubectl delete service cloudmart-frontend-app-service
+kubectl delete deployment cloudmart-frontend-app
+kubectl delete service cloudmart-backend-app-service
+kubectl delete deployment cloudmart-backend-app
+
+eksctl delete cluster --name cloudmart --region us-east-1
+```
 
 ![image](https://github.com/user-attachments/assets/8bdb3959-042b-4836-9210-99ebd631a3b7)
 
